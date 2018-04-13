@@ -243,7 +243,16 @@ sub reg_new_room {
       $h->server->command_controller($h)->not_alive($h, $player_id);
     } );
     $h->log->info($h->connection->log_message . " " . $h->req->ver . " #create room $room->{id} $room->{title}" );
-    $h->show('reg_new_room.cml', { id => ($p->{VE_TYPE} ? "HB" : "") . $room_id, name => $room->{title}, max_pl => $room->{max_players} });
+    $h->show('reg_new_room.cml', 
+    { 
+      player_id => $player_id,
+      hole_port => $h->server->config->{hole_port},
+      hole_host => $ENV{'HOST_NAME'},
+      hole_int => $h->server->config->{hole_int},
+      id => ($p->{VE_TYPE} ? "HB" : "") . $room_id, 
+      name => $room->{title}, 
+      max_pl => $room->{max_players} 
+    });
   }
 }
 
@@ -371,7 +380,13 @@ sub _join_to_room {
   $room->{ctlsum} = $h->server->_room_control_sum($room->{row});
   $h->server->data->{rooms_by_ctlsum}->{ $room->{ctlsum} } = $room;
   my $connection = $h->connection;
-  $h->show('join_room.cml' => { id => $room->{id}, max_pl => $room->{max_players}, name => $room->{title}, ip => $room->{host_addr} });
+  $h->show('join_room.cml' => 
+  { 
+    id => $room->{id}, 
+    max_pl => $room->{max_players}, 
+    name => $room->{title}, 
+    ip => $room->{host_addr} 
+  });
   $h->log->info($h->connection->log_message . " " . $h->req->ver . " #join room $room->{id} $room->{title}" );
 }
 
