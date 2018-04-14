@@ -1,4 +1,5 @@
 package SimpleCossacksServer::CommandController::Open;
+use Redis;
 use Mouse;
 use Coro::LWP;
 use LWP;
@@ -16,6 +17,8 @@ my @PUBLIC = qw[
   tournaments lcn_registration_dgl gg_cup_thanks_dgl
 ];
 
+my $redis = Redis->new(server => 'redis:6379');
+$redis->ping || die "redis do not answer";
 
 my %PUBLIC = map { $_ => 1 } @PUBLIC;
 sub public {
@@ -380,12 +383,25 @@ sub _join_to_room {
   $room->{ctlsum} = $h->server->_room_control_sum($room->{row});
   $h->server->data->{rooms_by_ctlsum}->{ $room->{ctlsum} } = $room;
   my $connection = $h->connection;
+  my $ip = $room->{host_addr};
+  my $port = 0;
+  print "room owner_id is " . $room->{host_id};
+  if ($redis->exists($room->{host_id})) {
+    my $host_info = decode_json($redis->get($room->{host_id}));
+    # my @keys = keys %host_info;
+    # print "redis $keys[0]\n";
+    # my @values = values %host_info;
+    # print "redis $values[0]\n";
+    $ip = $host_info->{'host'};
+    $port = $host_info->{'port'};
+  }
   $h->show('join_room.cml' => 
   { 
     id => $room->{id}, 
     max_pl => $room->{max_players}, 
     name => $room->{title}, 
-    ip => $room->{host_addr} 
+    port => $port,
+    ip => $ip
   });
   $h->log->info($h->connection->log_message . " " . $h->req->ver . " #join room $room->{id} $room->{title}" );
 }

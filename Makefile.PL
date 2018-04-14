@@ -19,6 +19,7 @@ WriteMakefile(
         'JSON' => 0,
         'Scalar::Util' => 0,
         'URI' => 0,
+        'Redis' => 0,
     },
     ($] >= 5.005 ?     ## Add these new keywords supported since 5.005
       (ABSTRACT_FROM  => 'lib/SimpleCossacksServer.pm', # retrieve abstract from module
